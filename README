@@ -1,0 +1,69 @@
+== About ==
+
+mfkeys is tool to extract keys from Mifare classic cards
+
+It will try to recover the keys from faults in the authentication protocol 
+in case not all keys can be found from default manifacture keys.
+
+It uses two methods to recover keys:
+- Darkside attack using parity bits leakage
+- Nested Authentication using encrypted nonce leakage
+
+The tool is intented as an alternative frontend to Mifare classic key recovery,
+providing an automated solution with minimal user interaction.
+
+a) If a keyfile is provided, mfkeys will check the keys and if valid, add them 
+to the list of known keys.
+
+b) If a single key is provided, each sector will be checked for this key and if 
+valid, add it to the list of known keys for that particular sector.
+
+c) If not skipped, mfkeys will also try a number of different vendor keys, 
+default to the card when produced at the factory. Many cards are still in the 
+wild with these.
+
+d) If no keys has been found so far, mfkeys will try to recover the A-key for
+the first sector using the Darkside attack.
+
+e) The remaining unknown keys will be recovered using Nested Authentication.
+
+
+== Requirements ==
+
+libnfc must be installed with its requirements, see http://libnfc.org/
+
+Only tested on Ubuntu 10.10
+
+
+== Copyright and Licenses ==
+
+mfkeys  Copyright (c) 2010 Christian Panton <christian@panton.org>
+
+mfkeys is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+mfkeys is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with mfkeys.  If not, see <http://www.gnu.org/licenses/>.
+
+Contains code partially or in full from the following projects:
+
+mfoc    Copyright (c) 2009 Andrei Costin <zveriu@gmail.com>, http://andreicostin.com
+
+mfcuk   Copyright (c) 2009 Norbert Szetei and Pavol Luptak <mifare@nethemba.com>
+                           Michal Boska <boska.michal@gmail.com>
+                           Romuald Conty <romuald@libnfc.org>
+                           
+crapto1 Copyright (C) 2008 bla <blapost@gmail.com>
+
+libnfc  Copyright (C) 2009 Roel Verdult
+                      2010 Romuald Conty
+                      
+                      
+
