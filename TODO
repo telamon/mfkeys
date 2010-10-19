@@ -1,0 +1,3 @@
+* Clean up mfcrack.c
+* Save keys and data to file after recovery
+* Make a nice dump to terminal of the keys if no output file is specified
