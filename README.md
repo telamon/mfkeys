@@ -1,4 +1,5 @@
-== About ==
+About
+-----
 
 mfkeys is tool to extract keys from Mifare classic cards
 
@@ -6,8 +7,8 @@ It will try to recover the keys from faults in the authentication protocol
 in case not all keys can be found from default manifacture keys.
 
 It uses two methods to recover keys:
-- Darkside attack using parity bits leakage
-- Nested Authentication using encrypted nonce leakage
+* Darkside attack using parity bits leakage
+* Nested Authentication using encrypted nonce leakage
 
 The tool is intented as an alternative frontend to Mifare classic key recovery,
 providing an automated solution with minimal user interaction.
@@ -28,14 +29,16 @@ the first sector using the Darkside attack.
 e) The remaining unknown keys will be recovered using Nested Authentication.
 
 
-== Requirements ==
+Requirements
+------------
 
 libnfc must be installed with its requirements, see http://libnfc.org/
 
 Only tested on Ubuntu 10.10
 
 
-== Copyright and Licenses ==
+Copyright and Licenses
+----------------------
 
 mfkeys  Copyright (c) 2010 Christian Panton <christian@panton.org>
 
