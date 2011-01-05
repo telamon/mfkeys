@@ -1,6 +1,3 @@
-About
------
-
 mfkeys is tool to extract keys from Mifare classic cards
 
 It will try to recover the keys from faults in the authentication protocol 
