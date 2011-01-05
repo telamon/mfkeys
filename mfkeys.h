@@ -26,6 +26,8 @@
 #define EXIT_WRONGPARAM     1
 #define EXIT_READERERROR    2
 
+typedef byte_t mfkey[6];
+
 void print_license();
 void print_usage();
 

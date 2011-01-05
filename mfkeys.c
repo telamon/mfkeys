@@ -83,8 +83,8 @@ int main (int argc, char** argv)
     static byte_t tmpkey[6]        = {0x00,0x00,0x00,0x00,0x00,0x00};
     
     
-    byte_t *mf_keya;   //a key table
-    byte_t *mf_keyb;   //b key table
+    mfkey *mf_keya;   //a key table
+    mfkey *mf_keyb;   //b key table
     
     bool *found_keya;  //a key valid mask
     bool *found_keyb;  //b key valid mask
@@ -93,12 +93,14 @@ int main (int argc, char** argv)
     
     // Parse Options
     int option;
-    bool option_verbose     = false;
-    bool option_interactive = false;
-    bool option_skipdefault = false;
-    bool option_usekey      = false;
-    bool option_usekeyfile  = false;
-    bool option_dumpdata    = false;
+    bool option_verbose      = false;
+    bool option_interactive  = false;
+    bool option_skipdefault  = false;
+    bool option_skiprecovery = false;
+    bool option_usekey       = false;
+    bool option_usekeyfile   = false;
+    bool option_dumpkeys     = false;
+    bool option_outputfile   = false;
     
     static char filename_output[PATH_MAX]  = "";
     static char filename_keyfile[PATH_MAX] = "";
@@ -107,8 +109,9 @@ int main (int argc, char** argv)
     {
         {"help",         0, 0, 'h'},
         {"verbose",      0, 0, 'v'},
-        {"dump-data",    0, 0, 'D'},
+        {"dump-keys",    0, 0, 'd'},
         {"skip-default", 0, 0, 's'},
+        {"skip-recovery",0, 0, 'S'},
         {"key",          0, 0, 'k'},
         {"keyfile",      0, 0, 'K'},
         {"version",      0, 0, 'V'},
@@ -116,7 +119,7 @@ int main (int argc, char** argv)
         {0, 0, 0, 0}
     };
     
-    static const char *short_options = "hvVdsK:k:o:";
+    static const char *short_options = "hvVdsSK:k:o:";
     
     while ((option = getopt_long(argc, argv, short_options, long_options, NULL)) != -1)
     {
@@ -134,8 +137,8 @@ int main (int argc, char** argv)
                 print_license();
                 return 1;
 
-            case 'D':
-                option_dumpdata = true;
+            case 'd':
+                option_dumpkeys = true;
                 break;
                 
             case 'k':
@@ -157,7 +160,12 @@ int main (int argc, char** argv)
                 option_skipdefault = true;
                 break;
                 
+            case 'S':
+                option_skiprecovery = true;
+                break;
+                
             case 'o':
+                option_outputfile = true;
                 strncpy(filename_output, optarg, PATH_MAX);
                 break;
                 
@@ -199,20 +207,18 @@ int main (int argc, char** argv)
     mf_4k = (target_info.nai.abtAtqa[1] == 0x02);
     mf_numsectors = mf_4k ? 40 : 16;
     
-    printf ("Found MIFARE Classic %ck card with UID: %02x%02x%02x%02x\n", 
+    printf ("Found: MIFARE Classic %ck card with UID %02x%02x%02x%02x\n", 
             mf_4k ? '4' : '1', mf_uid[3], mf_uid[2], mf_uid[1], mf_uid[0]);
             
     found_keya  = (bool *) malloc(sizeof(bool) * mf_numsectors);
     found_keyb  = (bool *) malloc(sizeof(bool) * mf_numsectors);
-    mf_keya     = (byte_t *) malloc(sizeof(byte_t) * mf_numsectors);
-    mf_keyb     = (byte_t *) malloc(sizeof(byte_t) * mf_numsectors);
+    mf_keya     = (mfkey *) malloc(sizeof(mfkey) * mf_numsectors);
+    mf_keyb     = (mfkey *) malloc(sizeof(mfkey) * mf_numsectors);
     
     for(i = 0; i < mf_numsectors; i++)
     {
         found_keya[i] = false;
         found_keyb[i] = false;
-        memcpy(&mf_keya[i], initkey, KEYSIZE); 
-        memcpy(&mf_keyb[i], initkey, KEYSIZE); 
     }
     
     if(option_usekey)
@@ -262,7 +268,9 @@ int main (int argc, char** argv)
     {
     
     }
-                
+    
+
+                    
     if(!(option_skipdefault || mf_numsectors * 2 == found_key))
     {   
         printf("Checking for %d default keys\n", (int)sizeof(mf_defaultkeys)/KEYSIZE);
@@ -317,141 +325,297 @@ int main (int argc, char** argv)
         printf("\n");
     }
     
-   
+    if(!option_skiprecovery)
+    {   
+        if(found_key == 0)
+        {
+            printf("No keys were found. Trying 'darkside' key recovery\n");
+            
+            if(darkside_keyrecovery(reader, mf_uid, 0, 0, &key)) // let's use block 0 key A
+            {
+                printf("Recovered [Key A: %012llx] for sector 0 using 'darkside' key recovery\n", bytes_to_num(key,6));
+                memcpy(&mf_keya[0], key, KEYSIZE);
+                found_keya[0] = true;
+                found_key++;
+                
+                mf_configure(reader); // reset to normal state
+                mf_anticol(reader, NULL); // bring up the card again
+                
+                found_key += mf_check_card(reader, mf_uid, mf_numsectors, key, found_keya, found_keyb, mf_keya, mf_keyb);
+            }
+            else
+            {
+                printf("Could not recover keys using 'darkside'.\n");
+            }   
+        }
+            
+        if(found_key < mf_numsectors*2)
+        {
+            printf("%d key(s) found. Trying to recover the %d remaining key(s) using Nested Authentication key recovery.\n", found_key, mf_numsectors*2 - found_key);
+            
+            
+            for(i = 0; i < mf_numsectors; i++){
+                if(found_keya[i])
+                {
+                    k = i;
+                    l = 0;
+                    memcpy(tmpkey, &mf_keya[i], KEYSIZE);
+                    
+                    break;
+                }
+                if(found_keya[i])
+                {
+                    k = i;
+                    l = 1;
+                    memcpy(tmpkey, &mf_keyb[i], KEYSIZE);
+                    break;
+                }
+            }
+            
+            
+            if(option_verbose)
+                printf("Exploit sector is %02d:%c\n", k, l ? 'b' : 'a');
+            
+            
+            printf("Finding keys: [");
+            
+            for(i = 0; i < mf_numsectors; i++){
+                if(found_keya[i] && found_keyb[i])
+                    printf("x");
+                else if(found_keya[i])
+                    printf("a");
+                else if(found_keyb[i])
+                    printf("b");
+                else
+                    printf(".");
+            }
+                        
+            printf("]\rFinding keys: [");
+            
+            for(i = 0; i < mf_numsectors; i++)
+            {
+                mf_configure(reader); // reset to normal state
+                mf_anticol(reader, NULL); // bring up the card again
+                   
+                if(!found_keya[i])
+                {
+                    if(na_keyrecovery(reader, mf_uid, 0, i, key, l, k, tmpkey))
+                    {
+                        found_keya[i] = true;
+                        found_key++;
+                        memcpy(&mf_keya[i], key, KEYSIZE); 
+                        
+                        found_key += mf_check_card(reader, mf_uid, mf_numsectors, key, found_keya, found_keyb, mf_keya, mf_keyb);
+                    }   
+                }
+                
+                if(!found_keyb[i])
+                {
+                    if(na_keyrecovery(reader, mf_uid, 1, i, key, l, k, tmpkey))
+                    {
+                        found_keyb[i] = true;
+                        found_key++;
+                        memcpy(&mf_keyb[i], key, KEYSIZE); 
+                        
+                        found_key += mf_check_card(reader, mf_uid, mf_numsectors, key, found_keya, found_keyb, mf_keya, mf_keyb);
+                    }
+                }
+
+                if(found_keya[i] && found_keyb[i])
+                    printf("x");
+                else if(found_keya[i])
+                    printf("a");
+                else if(found_keyb[i])
+                    printf("b");
+                else
+                    printf(".");
+                fflush(stdout);
+                
+            }
+            
+         printf("]\n");
+         
+        } 
+    }
+    
     if(found_key == 0)
     {
-        printf("No keys were found. Trying 'darkside' key recovery\n");
-        
-        if(darkside_keyrecovery(reader, mf_uid, 0, 0, &key)) // let's use block 0 key A
+        printf("No keys were found.\n");       
+    }
+    else 
+    {
+        if(found_key == mf_numsectors * 2)
         {
-            printf("Recovered [Key A: %012llx] for sector 0 using 'darkside' key recovery\n", bytes_to_num(key,6));
-            memcpy(&mf_keya[0], key, KEYSIZE);
-            found_keya[0] = true;
-            found_key++;
-            
-            mf_configure(reader); // reset to normal state
-            mf_anticol(reader, NULL); // bring up the card again
-            
-            found_key += mf_check_card(reader, mf_uid, mf_numsectors, key, found_keya, found_keyb, mf_keya, mf_keyb);
+            printf("All keys were found\n");
         }
         else
         {
-            printf("Could not recover keys using 'darkside'.\n");
-        }   
-    }
-        
-    if(found_key < mf_numsectors*2)
-    {
-        printf("%d key(s) found. Trying to recover the %d remaining key(s) using Nested Authentication key recovery.\n", found_key, mf_numsectors*2 - found_key);
-        
-        
-        for(i = 0; i < mf_numsectors; i++){
-            if(found_keya[i])
-            {
-                k = i;
-                l = 0;
-                memcpy(tmpkey, &mf_keya[i], KEYSIZE);
-                
-                break;
-            }
-            if(found_keya[i])
-            {
-                k = i;
-                l = 1;
-                memcpy(tmpkey, &mf_keyb[i], KEYSIZE);
-                break;
-            }
+            printf("%d of %d keys were found.\n", found_key, mf_numsectors * 2);
         }
         
         
-        if(option_verbose)
-            printf("Exploit sector is %d%c\n", k, l ? 'b' : 'a');
+        // DUMPING KEYS
+        if(option_dumpkeys)
+        {   
         
-        
-        printf("Finding keys: [");
-        
-        for(i = 0; i < mf_numsectors; i++){
-            if(found_keya[i] && found_keyb[i])
-                printf("x");
-            else if(found_keya[i])
-                printf("a");
-            else if(found_keyb[i])
-                printf("b");
-            else
-                printf(".");
-        }
-                    
-        printf("]\rFinding keys: [");
-        
-        for(i = 0; i < mf_numsectors; i++)
-        {
-            mf_configure(reader); // reset to normal state
-            mf_anticol(reader, NULL); // bring up the card again
-               
-            if(!found_keya[i])
-            {
-                if(na_keyrecovery(reader, mf_uid, 0, i, key, l, k, tmpkey))
-                {
-                    found_keya[i] = true;
-                    found_key++;
-                    memcpy(&mf_keya[i], key, KEYSIZE); 
-                    
-                    found_key += mf_check_card(reader, mf_uid, mf_numsectors, key, found_keya, found_keyb, mf_keya, mf_keyb);
-                }   
-            }
+            printf("\n");
+            printf("----------------------------------\n");
+            printf(" S# | Key A        | Key B\n");
+            printf("==================================\n");
             
-            if(!found_keyb[i])
+            for(i = 0; i < mf_numsectors; i++)
             {
-                if(na_keyrecovery(reader, mf_uid, 1, i, key, l, k, tmpkey))
+                printf(" %02d | ", i);
+                if(found_keya[i]) 
                 {
-                    found_keyb[i] = true;
-                    found_key++;
-                    memcpy(&mf_keyb[i], key, KEYSIZE); 
-                    
-                    found_key += mf_check_card(reader, mf_uid, mf_numsectors, key, found_keya, found_keyb, mf_keya, mf_keyb);
+                    printf("%012llx", bytes_to_num((byte_t *)&mf_keya[i], KEYSIZE));
                 }
+                else
+                {
+                    printf("------------");
+                }
+                
+                printf(" | ");
+                
+                if(found_keyb[i]) 
+                {
+                    printf("%012llx", bytes_to_num((byte_t *)&mf_keyb[i], KEYSIZE));
+                }
+                else
+                {
+                    printf("------------");
+                }
+                
+                printf("\n");
             }
-
-            if(found_keya[i] && found_keyb[i])
-                printf("x");
-            else if(found_keya[i])
-                printf("a");
-            else if(found_keyb[i])
-                printf("b");
-            else
-                printf(".");
-            fflush(stdout);
-            
+           
+            printf("----------------------------------\n\n");
         }
         
-     printf("]\n");
-     
+        // SAVING
+        if(option_outputfile)
+        {
+        
+            byte_t* card;
+        
+            byte_t* data;
+            uint8_t datalen = 0;
+            bool datadumped = false;
+            
+            if(option_verbose)
+                printf("Saving to file \"%s\"\n", filename_output);
+            
+            
+            card = (byte_t*) malloc(sizeof(byte_t*) * 1024 * (mf_4k ? 4 : 1));
+            
+            
+            for(i = 0; i < mf_numsectors; i++)
+            {    
+            
+                data = NULL;
+                  
+                if(found_keya[i])
+                {
+                
+                    if(!mf_checkkey(reader, mf_uid, i, 0, (byte_t *) &mf_keya[i]))
+                    {
+                        printf("ERROR: Could not authenticate for sector %02d with known A-key\n", i);
+                    }    
+                    else
+                    {
+                        if(mf_dumpsector(reader, i, &data, &datalen))
+                        {
+                            datadumped = true;
+                        }
+                        else
+                        {
+                            mf_configure(reader); // reset to normal state
+                            mf_anticol(reader, NULL); // bring up the card again
+                        }
+                    }
+                }
+                
+                if(found_keyb[i] && !datadumped)
+                {
+
+                    if(!mf_checkkey(reader, mf_uid, i, 1, (byte_t *) &mf_keyb[i]))
+                    {
+                        printf("ERROR: Could not authenticate for sector %02d with known B-key\n", i);
+                    }
+                    else
+                    {
+                        if(mf_dumpsector(reader, i, &data, &datalen))
+                        {
+                            datadumped = true;
+                        }
+                        else
+                        {
+                            mf_configure(reader); // reset to normal state
+                            mf_anticol(reader, NULL); // bring up the card again
+                        }
+                    }
+                }
+                
+                if(!datadumped)
+                {
+                
+                    if(data != NULL)
+                        free(data);
+
+                    int numblocks = i > 16 ? 16 : 4;
+                    datalen = numblocks*16;
+                    data = (byte_t *) malloc(sizeof(byte_t) * numblocks * 16);    
+                    for(j = 0; j < datalen; j++)
+                    {
+                        data[j] = 0; // ensure nulls
+                    }
+                }
+                
+                // copy keys
+                if(found_keya[i])
+                    memcpy(data + datalen - 16, &mf_keya[i], KEYSIZE);
+                
+                if(found_keyb[i])
+                    memcpy(data + datalen - KEYSIZE, &mf_keyb[i], KEYSIZE);
+                
+                if(option_verbose)
+                {
+                    printf(datadumped ? "[+]" : "[-]");
+                    printf(" %02d: ", i);
+                    hexprint(data, datalen);
+                }
+                
+                datadumped = false;
+                
+                int block = i * 4;
+                if(i > 15)
+                    block = 64 + (i-16)*16; 
+                
+                memcpy(card + sizeof(byte_t) * 16 * block, data, datalen);
+                
+                if(data != NULL)
+                    free(data);               
+                
+            }
+            
+            
+            FILE *output;
+            
+            output = fopen(filename_output, "wb");
+            fwrite(card, sizeof(byte_t), (mf_4k ? 4 : 1) * 1024, output);
+            fclose(output);
+            free(card);
+        }
+        
     }
-    
-    
-    
-    
-    if(found_key == 0)
-    {
-        printf("No keys were found\n");       
-    }
-    else if(found_key == mf_numsectors * 2)
-    {
-        printf("All keys were found\n");
-    }
-    else
-    {
-        printf("%d of %d keys were found.\n", found_key, mf_numsectors * 2);
-    }
-    
-    
-              
+             
 
     free(found_keya);
     free(found_keyb);
     free(mf_keya);
     free(mf_keyb);
-        
+    
+    
     nfc_disconnect(reader);
     return 0;   
 }
@@ -479,11 +643,11 @@ void print_usage()
 	fprintf(stdout, "   -v, --verbose\n");
 	fprintf(stdout, "       Increase amount of output.\n");
 	fprintf(stdout, "   -d, --dump-keys\n");
-	fprintf(stdout, "       Try to recover unknown keys.\n");
-	fprintf(stdout, "   -D, --dump-data\n");
-	fprintf(stdout, "       Dump entire card when done.\n");
+	fprintf(stdout, "       Dump keys to STDOUT when done.\n");
     fprintf(stdout, "   -s, --skip-default\n");
 	fprintf(stdout, "       Do not try to use default keys.\n");
+    fprintf(stdout, "   -S, --skip-recovery\n");
+	fprintf(stdout, "       Do not try to recovery any keys.\n");
 	fprintf(stdout, "   -k, --key KEY\n");
 	fprintf(stdout, "       Try using 6 byte key (12 hex chars).\n");
     fprintf(stdout, "   -K, --keyfile FILE\n");

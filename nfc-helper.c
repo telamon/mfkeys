@@ -21,6 +21,7 @@
 
 #include <nfc/nfc.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "mifare.h"
 #include "nfc-helper.h"
@@ -118,6 +119,43 @@ int mf_check_card(nfc_device_t *reader, byte_t *uid, uint8_t numsector, byte_t *
     return c;
 }
 
+
+bool mf_dumpsector(nfc_device_t *reader, uint8_t sector, byte_t **data, uint8_t *datalen)
+{
+
+    mifare_param mf_param;
+    int i, j;
+    int block = sector * 4;
+    if(sector > 15)
+        block = 64 + (sector-16)*16; 
+
+    int numblocks = sector > 16 ? 16 : 4;
+
+    *datalen = numblocks*16;
+    *data = (byte_t *) malloc(sizeof(byte_t) * numblocks * 16);
+    
+    for(i = 0; i < *datalen; i++)
+    {
+        (*data)[i] = 0; // ensure nulls
+    }
+
+    for(i = 0; i < numblocks; i++)
+    {
+        
+        if(nfc_initiator_mifare_cmd(reader, MC_READ, block + i, &mf_param))
+        {
+            memcpy(*data + i * sizeof(byte_t) * 16, mf_param.mpd.abtData, 16);
+        }
+        else
+        {
+            return false;
+        }
+    } 
+    return true;
+                    
+}
+
+
 long long unsigned int bytes_to_num(byte_t* src, uint32_t len) {
 	uint64_t num = 0;
 	while (len--)
@@ -126,4 +164,14 @@ long long unsigned int bytes_to_num(byte_t* src, uint32_t len) {
 		src++;
 	}
 	return num;
+}
+
+void hexprint(byte_t* data, uint8_t len) {
+    int i;
+    for(i = 0; i < len; i++)
+    {
+        if(i % 8 == 0 && i > 0) printf(" ");
+        printf("%02X", data[i]);
+    }
+    printf("\n");
 }
