@@ -35,7 +35,7 @@ tag_nonce_entry_t arrSpoofEntries[MAX_TAG_NONCES];
 uint32_t numSpoofEntries = 0;
 uint32_t numAuthAttempts = 0;
 
-bool darkside_keyrecovery(nfc_device_t* pnd, byte_t* uid, uint8_t keytype, uint32_t sector, byte_t *key)
+bool darkside_keyrecovery(nfc_device* pnd, byte_t* uid, uint8_t keytype, uint32_t sector, byte_t *key)
 {
 
     memset((void *)arrSpoofEntries, 0, sizeof(arrSpoofEntries));
@@ -99,7 +99,7 @@ bool darkside_keyrecovery(nfc_device_t* pnd, byte_t* uid, uint8_t keytype, uint3
 
 
 
-bool na_keyrecovery(nfc_device_t* pnd, byte_t* uidx, uint8_t keytype, int a_sector, byte_t *key, uint8_t knownkeytype, int e_sector, byte_t *knownkey)
+bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector, byte_t *key, uint8_t knownkeytype, int e_sector, byte_t *knownkey)
 {
 
     int k, i, n, m;
@@ -670,7 +670,7 @@ void num_to_bytes(uint64_t n, uint32_t len, byte_t* dest) {
 }
 
 
-uint32_t darkside_keyrecovery_inner(nfc_device_t* pnd, uint32_t uiUID, uint64_t ui64Key, mifare_key_type bKeyType, uint32_t uiBlock, uint64_t *ui64KeyRecovered)
+uint32_t darkside_keyrecovery_inner(nfc_device* pnd, uint32_t uiUID, uint64_t ui64Key, mifare_key_type bKeyType, uint32_t uiBlock, uint64_t *ui64KeyRecovered)
 {
     // Communication variables
     uint32_t pos, pos2, nt;

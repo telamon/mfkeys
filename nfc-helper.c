@@ -28,12 +28,12 @@
 #include "nfc-helper.h"
 
 // from libnfc: utils/nfc-mfultralight.c
-static const nfc_modulation_t nmMifare = {
+static const nfc_modulation nmMifare = {
   .nmt = NMT_ISO14443A,
   .nbr = NBR_106,
 };
 
-bool mf_configure(nfc_device_t *reader)
+bool mf_configure(nfc_device *reader)
 {
 
     bool nfc_status;
@@ -48,7 +48,7 @@ bool mf_configure(nfc_device_t *reader)
     return nfc_status;
 }
 
-bool mf_anticol(nfc_device_t *reader, nfc_target_t *target)
+bool mf_anticol(nfc_device *reader, nfc_target *target)
 {
     if(nfc_initiator_select_passive_target(reader, nmMifare, NULL, 0, target))
     {
@@ -69,7 +69,7 @@ bool mf_anticol(nfc_device_t *reader, nfc_target_t *target)
     return false;
 }
 
-bool mf_checkkey(nfc_device_t *reader, byte_t *uid, uint8_t sector, uint8_t keytype, byte_t *key)
+bool mf_checkkey(nfc_device *reader, byte_t *uid, uint8_t sector, uint8_t keytype, byte_t *key)
 {
     mifare_param param;
     mifare_cmd mc;
@@ -96,7 +96,7 @@ bool mf_checkkey(nfc_device_t *reader, byte_t *uid, uint8_t sector, uint8_t keyt
     
 }
 
-int mf_check_card(nfc_device_t *reader, byte_t *uid, uint8_t numsector, byte_t *key, byte_t *amap, byte_t *bmap, byte_t *akeys, byte_t *bkeys)
+int mf_check_card(nfc_device *reader, byte_t *uid, uint8_t numsector, byte_t *key, byte_t *amap, byte_t *bmap, byte_t *akeys, byte_t *bkeys)
 {
     int i;
     int c = 0;
@@ -127,7 +127,7 @@ int mf_check_card(nfc_device_t *reader, byte_t *uid, uint8_t numsector, byte_t *
 }
 
 
-bool mf_dumpsector(nfc_device_t *reader, uint8_t sector, byte_t **data, uint8_t *datalen)
+bool mf_dumpsector(nfc_device *reader, uint8_t sector, byte_t **data, uint8_t *datalen)
 {
 
     mifare_param mf_param;

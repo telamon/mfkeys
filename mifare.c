@@ -42,7 +42,7 @@
  * The MIFARE Classic Specification (http://www.nxp.com/acrobat/other/identification/M001053_MF1ICS50_rev5_3.pdf) explains more about this process.
  */
 bool
-nfc_initiator_mifare_cmd (nfc_device_t * pnd, const mifare_cmd mc, const uint8_t ui8Block, mifare_param * pmp)
+nfc_initiator_mifare_cmd (nfc_device * pnd, const mifare_cmd mc, const uint8_t ui8Block, mifare_param * pmp)
 {
   byte_t  abtRx[265];
   size_t  szRxLen;

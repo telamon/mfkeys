@@ -97,7 +97,7 @@ int compar_int(const void * a, const void * b);
 
 int compareTagNonces (const void * a, const void * b);
 bool mfcuk_key_uint64_to_arr(const uint64_t *ui64Key, uint8_t *arr6Key);
-uint32_t darkside_keyrecovery_inner(nfc_device_t* pnd, uint32_t uiUID, uint64_t ui64Key, mifare_key_type bKeyType, uint32_t uiBlock, uint64_t *ui64KeyRecovered);
+uint32_t darkside_keyrecovery_inner(nfc_device* pnd, uint32_t uiUID, uint64_t ui64Key, mifare_key_type bKeyType, uint32_t uiBlock, uint64_t *ui64KeyRecovered);
 
 
 

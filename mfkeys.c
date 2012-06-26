@@ -51,8 +51,8 @@ int main (int argc, char** argv)
     int i, j, k, l; // iterators
 
     // NFC
-    nfc_device_t *reader;
-    nfc_target_t target;
+    nfc_device *reader;
+    nfc_target target;
     
     // Mifare
     byte_t *mf_uid;
