@@ -38,12 +38,12 @@ bool mf_configure(nfc_device *reader)
 
     bool nfc_status;
     nfc_status  = nfc_initiator_init(reader);
-    nfc_status &= nfc_configure(reader, NDO_ACTIVATE_FIELD, false);
-    nfc_status &= nfc_configure(reader, NDO_INFINITE_SELECT, false);
-    nfc_status &= nfc_configure(reader, NDO_HANDLE_CRC, true);
-    nfc_status &= nfc_configure(reader, NDO_HANDLE_PARITY, true);
-    nfc_status &= nfc_configure(reader, NDO_ACTIVATE_FIELD, true);
-    nfc_status &= nfc_configure(reader, NDO_AUTO_ISO14443_4, false);
+    nfc_status &= nfc_configure(reader, NP_ACTIVATE_FIELD, false);
+    nfc_status &= nfc_configure(reader, NP_INFINITE_SELECT, false);
+    nfc_status &= nfc_configure(reader, NP_HANDLE_CRC, true);
+    nfc_status &= nfc_configure(reader, NP_HANDLE_PARITY, true);
+    nfc_status &= nfc_configure(reader, NP_ACTIVATE_FIELD, true);
+    nfc_status &= nfc_configure(reader, NP_AUTO_ISO14443_4, false);
     
     return nfc_status;
 }
