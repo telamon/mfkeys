@@ -163,7 +163,7 @@ bool na_keyrecovery(nfc_device_t* pnd, byte_t* uidx, uint8_t keytype, int a_sect
 	nfc_configure (pnd, NDO_EASY_FRAMING, false);
 
 	// Get a plaintext nonce
-	nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, &RxLen);
+	nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, &RxLen, 0);
 	nfc_configure(pnd, NDO_EASY_FRAMING, true);
 	
 	Nt = bytes_to_num(Rx, 4);
@@ -287,7 +287,7 @@ bool na_keyrecovery(nfc_device_t* pnd, byte_t* uidx, uint8_t keytype, int a_sect
         nfc_configure (pnd, NDO_EASY_FRAMING, false);
 
         // Get a plaintext nonce
-        nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, &RxLen);
+        nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, &RxLen, 0);
         nfc_configure(pnd, NDO_EASY_FRAMING, true);
 
         Nt = bytes_to_num(Rx, 4);
@@ -439,7 +439,7 @@ bool na_keyrecovery(nfc_device_t* pnd, byte_t* uidx, uint8_t keytype, int a_sect
 	        nfc_configure (pnd, NDO_EASY_FRAMING, false);
 
 	        // Get a plaintext nonce
-	        nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, &RxLen);
+	        nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, &RxLen, 0);
 	        nfc_configure(pnd, NDO_EASY_FRAMING, true);
 	
 	        Nt = bytes_to_num(Rx, 4);
@@ -545,7 +545,7 @@ bool na_keyrecovery(nfc_device_t* pnd, byte_t* uidx, uint8_t keytype, int a_sect
         nfc_configure (pnd, NDO_EASY_FRAMING, false);
 
         // Get a plaintext nonce
-        nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, &RxLen);
+        nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, &RxLen, 0);
         nfc_configure(pnd, NDO_EASY_FRAMING, true);
 
         Nt = bytes_to_num(Rx, 4);
@@ -709,7 +709,7 @@ uint32_t darkside_keyrecovery_inner(nfc_device_t* pnd, uint32_t uiUID, uint64_t 
 
     // Request plain tag-nonce
     //printf("Nt: ");
-    if (!nfc_initiator_transceive_bytes(pnd,abtAuth,4,abtRx,&szRx))
+    if (!nfc_initiator_transceive_bytes(pnd,abtAuth,4,abtRx,&szRx, 0))
     {
         return 1;
     }
