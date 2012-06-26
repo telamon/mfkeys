@@ -26,6 +26,8 @@
 
 #  include <nfc/nfc-types.h>
 
+typedef uint8_t byte_t;
+
 // Compiler directive, set struct alignment to 1 byte_t for compatibility
 #  pragma pack(1)
 

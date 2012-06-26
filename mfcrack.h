@@ -49,7 +49,7 @@ typedef struct {
         uint32_t       median;
         uint32_t       num_distances;
         uint32_t       tolerance;
-        byte_t          parity[3];              // used for 3 bits of parity information
+        uint8_t        parity[3];              // used for 3 bits of parity information
 } denonce;                                      // Revealed information about nonce 
 
 typedef struct {
@@ -65,7 +65,7 @@ typedef struct {
 typedef struct tag_nonce_entry
 {
 	uint32_t tagNonce; // Tag nonce we target for fixation
-    byte_t spoofFlag; // No spoofing until we have a successful auth with this tagNonce. Once we have, we want to spoof to get the encrypted 0x5 value
+    uint8_t spoofFlag; // No spoofing until we have a successful auth with this tagNonce. Once we have, we want to spoof to get the encrypted 0x5 value
     uint32_t num_of_appearances; // For statistics, how many times this tag nonce appeared for the given SLEEP_ values
 
     // STAGE1 data for "dark side" and lsfr_common_prefix()
@@ -87,16 +87,16 @@ typedef struct tag_nonce_entry
     uint8_t parBitsArr[MFCUK_DARKSIDE_MAX_LEVELS][8]; // PARAM: used as par, contains value of parBits byte-bit values just splitted out one bit per byte thus second pair of braces [8]
 } tag_nonce_entry_t;
 
-int valid_nonce(uint32_t Nt, uint32_t NtEnc, uint32_t Ks1, byte_t * parity);
-byte_t oddparity(const byte_t bt);
-void num_to_bytes(uint64_t n, uint32_t len, byte_t* dest);
+int valid_nonce(uint32_t Nt, uint32_t NtEnc, uint32_t Ks1, uint8_t * parity);
+uint8_t oddparity(const uint8_t bt);
+void num_to_bytes(uint64_t n, uint32_t len, uint8_t* dest);
 countKeys * uniqsort(uint64_t *possibleKeys, uint32_t size);
 uint32_t median(denonce d);
 int compar_int(const void * a, const void * b);
 
 
 int compareTagNonces (const void * a, const void * b);
-bool mfcuk_key_uint64_to_arr(const uint64_t *ui64Key, byte_t *arr6Key);
+bool mfcuk_key_uint64_to_arr(const uint64_t *ui64Key, uint8_t *arr6Key);
 uint32_t darkside_keyrecovery_inner(nfc_device_t* pnd, uint32_t uiUID, uint64_t ui64Key, mifare_key_type bKeyType, uint32_t uiBlock, uint64_t *ui64KeyRecovered);
 
 
