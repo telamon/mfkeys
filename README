@@ -29,9 +29,8 @@ e) The remaining unknown keys will be recovered using Nested Authentication.
 Requirements
 ------------
 
-libnfc must be installed with its requirements, see http://libnfc.org/
+libnfc version 1.5.1 must be installed with its requirements, see http://libnfc.org/
 
-Only tested on Ubuntu 10.10
 
 
 Copyright and Licenses
