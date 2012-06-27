@@ -24,7 +24,7 @@
 #include "mifare.h"
 
 bool mf_configure(nfc_device_t *reader);
-bool mf_anticol(nfc_device_t *reader, nfc_target_info_t *target);
+bool mf_anticol(nfc_device_t *reader, nfc_target_t *target);
 bool mf_checkkey(nfc_device_t *reader, byte_t *uid, uint8_t sector, uint8_t keytype, byte_t *key);
 long long unsigned int bytes_to_num(byte_t* src, uint32_t len);
 void hexprint(byte_t* data, uint8_t len);

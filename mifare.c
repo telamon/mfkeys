@@ -49,10 +49,6 @@ nfc_initiator_mifare_cmd (nfc_device_t * pnd, const mifare_cmd mc, const uint8_t
   size_t  szParamLen;
   byte_t  abtCmd[265];
 
-  // Make sure we are dealing with a active device
-  if (!pnd->bActive)
-    return false;
-
   abtCmd[0] = mc;               // The MIFARE Classic command
   abtCmd[1] = ui8Block;         // The block address (1K=0x00..0x39, 4K=0x00..0xff)
 
@@ -92,7 +88,7 @@ nfc_initiator_mifare_cmd (nfc_device_t * pnd, const mifare_cmd mc, const uint8_t
     memcpy (abtCmd + 2, (byte_t *) pmp, szParamLen);
 
   // Fire the mifare command
-  if (!nfc_initiator_transceive_bytes (pnd, abtCmd, 2 + szParamLen, abtRx, &szRxLen)) {
+  if (!nfc_initiator_transceive_bytes (pnd, abtCmd, 2 + szParamLen, abtRx, &szRxLen, 0)) {
     //if (pnd->iLastError != 0x14)
       //nfc_perror (pnd, "nfc_initiator_transceive_bytes");
     return false;

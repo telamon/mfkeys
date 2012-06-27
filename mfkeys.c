@@ -52,7 +52,7 @@ int main (int argc, char** argv)
 
     // NFC
     nfc_device_t *reader;
-    nfc_target_info_t target_info;
+    nfc_target_t target;
     
     // Mifare
     byte_t *mf_uid;
@@ -198,13 +198,13 @@ int main (int argc, char** argv)
         printf ("Found: NFC reader %s\n", reader->acName);
         
  
-    if(!mf_anticol(reader, &target_info)){
+    if(!mf_anticol(reader, &target)){
         nfc_disconnect(reader);
         return 3;
     }
     
-    mf_uid = target_info.nai.abtUid;
-    mf_4k = (target_info.nai.abtAtqa[1] == 0x02);
+    mf_uid = target.nti.nai.abtUid;
+    mf_4k = (target.nti.nai.abtAtqa[1] == 0x02);
     mf_numsectors = mf_4k ? 40 : 16;
     
     printf ("Found: MIFARE Classic %ck card with UID %02x%02x%02x%02x\n", 

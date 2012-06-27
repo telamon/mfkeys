@@ -20,11 +20,18 @@
 */
 
 #include <nfc/nfc.h>
+#include <nfc/nfc-types.h>
 #include <string.h>
 #include <stdlib.h>
 
 #include "mifare.h"
 #include "nfc-helper.h"
+
+// from libnfc: utils/nfc-mfultralight.c
+static const nfc_modulation_t nmMifare = {
+  .nmt = NMT_ISO14443A,
+  .nbr = NBR_106,
+};
 
 bool mf_configure(nfc_device_t *reader)
 {
@@ -41,14 +48,14 @@ bool mf_configure(nfc_device_t *reader)
     return nfc_status;
 }
 
-bool mf_anticol(nfc_device_t *reader, nfc_target_info_t *target)
+bool mf_anticol(nfc_device_t *reader, nfc_target_t *target)
 {
-    if(nfc_initiator_select_passive_target(reader, NM_ISO14443A_106, NULL, 0, target))
+    if(nfc_initiator_select_passive_target(reader, nmMifare, NULL, 0, target))
     {
         if(target == NULL)
             return true;
             
-        if ((target->nai.btSak & 0x08) == 0) {
+        if ((target->nti.nai.btSak & 0x08) == 0) {
             fprintf (stderr, "Error: tag is not a MIFARE Classic card\n");
             return false;
         }
