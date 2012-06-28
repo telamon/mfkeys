@@ -159,12 +159,12 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 	// print_hex(Auth, 4);
 	
 	// We need full control over the CRC
-	nfc_configure(pnd, NP_HANDLE_CRC, false);
-	nfc_configure (pnd, NP_EASY_FRAMING, false);
+	nfc_device_set_property_bool(pnd, NP_HANDLE_CRC, false);
+	nfc_device_set_property_bool (pnd, NP_EASY_FRAMING, false);
 
 	// Get a plaintext nonce
 	RxLen = nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, sizeof(Rx), 0);
-	nfc_configure(pnd, NP_EASY_FRAMING, true);
+	nfc_device_set_property_bool(pnd, NP_EASY_FRAMING, true);
 	
 	Nt = bytes_to_num(Rx, 4);
 	
@@ -192,7 +192,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 		ArEncPar[i] = filter(pcs->odd) ^ oddparity(Nt);
 	}
 	
-	nfc_configure(pnd, NP_HANDLE_PARITY, false);
+	nfc_device_set_property_bool(pnd, NP_HANDLE_PARITY, false);
 	
 	// Transmit reader-answer
 	// fprintf(stdout, "\t{Ar}:\t");
@@ -253,7 +253,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 			    ArEnc[i] = crypto1_byte(pcs, 0x00, 0) ^ (Nt&0xFF);
 			    ArEncPar[i] = filter(pcs->odd) ^ oddparity(Nt);
 		    }
-		    nfc_configure(pnd,NP_HANDLE_PARITY,false);
+		    nfc_device_set_property_bool(pnd,NP_HANDLE_PARITY,false);
 		    if ((RxLen = nfc_initiator_transceive_bits(pnd, ArEnc, 64, ArEncPar, Rx, RxPar)) != 32) {
 			    fprintf(stderr, "AA Reader-answer transfer error, exiting..\n");
 		    }
@@ -283,12 +283,12 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
         // print_hex(Auth, 4);
 
         // We need full control over the CRC
-        nfc_configure(pnd, NP_HANDLE_CRC, false);
-        nfc_configure (pnd, NP_EASY_FRAMING, false);
+        nfc_device_set_property_bool(pnd, NP_HANDLE_CRC, false);
+        nfc_device_set_property_bool (pnd, NP_EASY_FRAMING, false);
 
         // Get a plaintext nonce
         RxLen = nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, sizeof(Rx), 0);
-        nfc_configure(pnd, NP_EASY_FRAMING, true);
+        nfc_device_set_property_bool(pnd, NP_EASY_FRAMING, true);
 
         Nt = bytes_to_num(Rx, 4);
 
@@ -316,7 +316,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 	        ArEncPar[i] = filter(pcs->odd) ^ oddparity(Nt);
         }
 
-        nfc_configure(pnd, NP_HANDLE_PARITY, false);
+        nfc_device_set_property_bool(pnd, NP_HANDLE_PARITY, false);
 
         // Transmit reader-answer
         // fprintf(stdout, "\t{Ar}:\t");
@@ -435,12 +435,12 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 	        // print_hex(Auth, 4);
 	
 	        // We need full control over the CRC
-	        nfc_configure(pnd, NP_HANDLE_CRC, false);
-	        nfc_configure (pnd, NP_EASY_FRAMING, false);
+	        nfc_device_set_property_bool(pnd, NP_HANDLE_CRC, false);
+	        nfc_device_set_property_bool (pnd, NP_EASY_FRAMING, false);
 
 	        // Get a plaintext nonce
 	        RxLen = nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, sizeof(Rx), 0);
-	        nfc_configure(pnd, NP_EASY_FRAMING, true);
+	        nfc_device_set_property_bool(pnd, NP_EASY_FRAMING, true);
 	
 	        Nt = bytes_to_num(Rx, 4);
 	
@@ -468,7 +468,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 		        ArEncPar[i] = filter(pcs->odd) ^ oddparity(Nt);
 	        }
 	
-	        nfc_configure(pnd, NP_HANDLE_PARITY, false);
+	        nfc_device_set_property_bool(pnd, NP_HANDLE_PARITY, false);
 	
 	        // Transmit reader-answer
 	        // fprintf(stdout, "\t{Ar}:\t");
@@ -541,12 +541,12 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
         // print_hex(Auth, 4);
 
         // We need full control over the CRC
-        nfc_configure(pnd, NP_HANDLE_CRC, false);
-        nfc_configure (pnd, NP_EASY_FRAMING, false);
+        nfc_device_set_property_bool(pnd, NP_HANDLE_CRC, false);
+        nfc_device_set_property_bool (pnd, NP_EASY_FRAMING, false);
 
         // Get a plaintext nonce
         RxLen = nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, sizeof(Rx), 0);
-        nfc_configure(pnd, NP_EASY_FRAMING, true);
+        nfc_device_set_property_bool(pnd, NP_EASY_FRAMING, true);
 
         Nt = bytes_to_num(Rx, 4);
 
@@ -574,7 +574,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 	        ArEncPar[i] = filter(pcs->odd) ^ oddparity(Nt);
         }
 
-        nfc_configure(pnd, NP_HANDLE_PARITY, false);
+        nfc_device_set_property_bool(pnd, NP_HANDLE_PARITY, false);
 
         // Transmit reader-answer
         // fprintf(stdout, "\t{Ar}:\t");
@@ -702,10 +702,10 @@ uint32_t darkside_keyrecovery_inner(nfc_device* pnd, uint32_t uiUID, uint64_t ui
     iso14443a_crc_append(abtAuth,2);
 
     // Now we take over, first we need full control over the CRC
-    nfc_configure(pnd,NP_HANDLE_CRC,false);
+    nfc_device_set_property_bool(pnd,NP_HANDLE_CRC,false);
 
     // We need to disable EASY_FRAMING feature to talk in "raw" mode
-    nfc_configure (pnd, NP_EASY_FRAMING, false);
+    nfc_device_set_property_bool (pnd, NP_EASY_FRAMING, false);
 
     // Request plain tag-nonce
     //printf("Nt: ");
@@ -713,7 +713,7 @@ uint32_t darkside_keyrecovery_inner(nfc_device* pnd, uint32_t uiUID, uint64_t ui
     {
         return 1;
     }
-    nfc_configure (pnd, NP_EASY_FRAMING, true);
+    nfc_device_set_property_bool (pnd, NP_EASY_FRAMING, true);
 
     //print_hex(abtRx,4);
 
@@ -855,7 +855,7 @@ uint32_t darkside_keyrecovery_inner(nfc_device* pnd, uint32_t uiUID, uint64_t ui
     }
 
     // Finally we want to send arbitrary parity bits
-    nfc_configure(pnd,NP_HANDLE_PARITY,false);
+    nfc_device_set_property_bool(pnd,NP_HANDLE_PARITY,false);
 
     // Transmit reader-answer
     //printf(" Ar: ");
