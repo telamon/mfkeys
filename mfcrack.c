@@ -148,7 +148,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 	
 	byte_t Rx[MAX_FRAME_LEN]; // Tag response
 	byte_t RxPar[MAX_FRAME_LEN]; // Tag response
-	size_t RxLen;
+	ssize_t RxLen;
 	
 	uint32_t Nt, NtLast, NtProbe, NtEnc, Ks1;
 	
@@ -163,7 +163,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 	nfc_configure (pnd, NP_EASY_FRAMING, false);
 
 	// Get a plaintext nonce
-	nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, &RxLen, 0);
+	RxLen = nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, sizeof(Rx), 0);
 	nfc_configure(pnd, NP_EASY_FRAMING, true);
 	
 	Nt = bytes_to_num(Rx, 4);
@@ -197,7 +197,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 	// Transmit reader-answer
 	// fprintf(stdout, "\t{Ar}:\t");
 	// print_hex_par(ArEnc, 64, ArEncPar);
-	if ((!nfc_initiator_transceive_bits(pnd, ArEnc, 64, ArEncPar, Rx, &RxLen, RxPar)) || (RxLen != 32)) {
+	if ((RxLen = nfc_initiator_transceive_bits(pnd, ArEnc, 64, ArEncPar, Rx, RxPar)) != 32) {
 		fprintf(stderr, "A Reader-answer transfer error, exiting..\n");
 	}
 	
@@ -228,7 +228,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 		    }
 
 		    // Sending the encrypted Auth command
-		    if (!nfc_initiator_transceive_bits(pnd, AuthEnc, 32, AuthEncPar,Rx, &RxLen, RxPar)) {
+		    if ((RxLen = nfc_initiator_transceive_bits(pnd, AuthEnc, 32, AuthEncPar,Rx, RxPar)) < 0) {
 			    fprintf(stdout, "A Error requesting encrypted tag-nonce\n");
 			    return false;
 		    }
@@ -254,7 +254,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 			    ArEncPar[i] = filter(pcs->odd) ^ oddparity(Nt);
 		    }
 		    nfc_configure(pnd,NP_HANDLE_PARITY,false);
-		    if ((!nfc_initiator_transceive_bits(pnd, ArEnc, 64, ArEncPar, Rx, &RxLen, RxPar)) || (RxLen != 32)) {
+		    if ((RxLen = nfc_initiator_transceive_bits(pnd, ArEnc, 64, ArEncPar, Rx, RxPar)) != 32) {
 			    fprintf(stderr, "AA Reader-answer transfer error, exiting..\n");
 		    }
 		    Nt = prng_successor(Nt, 32);
@@ -287,7 +287,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
         nfc_configure (pnd, NP_EASY_FRAMING, false);
 
         // Get a plaintext nonce
-        nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, &RxLen, 0);
+        RxLen = nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, sizeof(Rx), 0);
         nfc_configure(pnd, NP_EASY_FRAMING, true);
 
         Nt = bytes_to_num(Rx, 4);
@@ -321,7 +321,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
         // Transmit reader-answer
         // fprintf(stdout, "\t{Ar}:\t");
         // print_hex_par(ArEnc, 64, ArEncPar);
-        if ((!nfc_initiator_transceive_bits(pnd, ArEnc, 64, ArEncPar, Rx, &RxLen, RxPar)) || (RxLen != 32)) {
+        if ((RxLen = nfc_initiator_transceive_bits(pnd, ArEnc, 64, ArEncPar, Rx, RxPar)) != 32) {
 	        fprintf(stderr, "AAA Reader-answer transfer error, exiting..\n");
         }
 
@@ -364,7 +364,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 		    }
 		    
 		    
-		    if (!nfc_initiator_transceive_bits(pnd, AuthEnc, 32, AuthEncPar, Rx, &RxLen, RxPar)) {
+		    if ((RxLen = nfc_initiator_transceive_bits(pnd, AuthEnc, 32, AuthEncPar, Rx, RxPar)) < 0) {
 			    fprintf(stdout, "B Error requesting encrypted tag-nonce\n");
 		    }
 		
@@ -439,7 +439,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 	        nfc_configure (pnd, NP_EASY_FRAMING, false);
 
 	        // Get a plaintext nonce
-	        nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, &RxLen, 0);
+	        RxLen = nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, sizeof(Rx), 0);
 	        nfc_configure(pnd, NP_EASY_FRAMING, true);
 	
 	        Nt = bytes_to_num(Rx, 4);
@@ -473,7 +473,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
 	        // Transmit reader-answer
 	        // fprintf(stdout, "\t{Ar}:\t");
 	        // print_hex_par(ArEnc, 64, ArEncPar);
-	        if ((!nfc_initiator_transceive_bits(pnd, ArEnc, 64, ArEncPar, Rx, &RxLen, RxPar)) || (RxLen != 32)) {
+	        if ((RxLen = nfc_initiator_transceive_bits(pnd, ArEnc, 64, ArEncPar, Rx, RxPar)) != 32) {
 		        fprintf(stderr, "AAAA Reader-answer transfer error, exiting..\n");
 	        }
 	
@@ -545,7 +545,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
         nfc_configure (pnd, NP_EASY_FRAMING, false);
 
         // Get a plaintext nonce
-        nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, &RxLen, 0);
+        RxLen = nfc_initiator_transceive_bytes(pnd, Auth, 4, Rx, sizeof(Rx), 0);
         nfc_configure(pnd, NP_EASY_FRAMING, true);
 
         Nt = bytes_to_num(Rx, 4);
@@ -579,7 +579,7 @@ bool na_keyrecovery(nfc_device* pnd, byte_t* uidx, uint8_t keytype, int a_sector
         // Transmit reader-answer
         // fprintf(stdout, "\t{Ar}:\t");
         // print_hex_par(ArEnc, 64, ArEncPar);
-        if ((!nfc_initiator_transceive_bits(pnd, ArEnc, 64, ArEncPar, Rx, &RxLen, RxPar)) || (RxLen != 32)) {
+        if ((RxLen = nfc_initiator_transceive_bits(pnd, ArEnc, 64, ArEncPar, Rx, RxPar)) != 32) {
 	        fprintf(stderr, "Reader-answer transfer error, exiting..\n");
         }
 
@@ -680,7 +680,7 @@ uint32_t darkside_keyrecovery_inner(nfc_device* pnd, uint32_t uiUID, uint64_t ui
     byte_t abtArEncPar[8]    = { 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 };
     byte_t abtRx[MAX_FRAME_LEN];
     byte_t abtRxPar[MAX_FRAME_LEN];
-    size_t szRx;
+    ssize_t szRx;
     
    
 
@@ -709,7 +709,7 @@ uint32_t darkside_keyrecovery_inner(nfc_device* pnd, uint32_t uiUID, uint64_t ui
 
     // Request plain tag-nonce
     //printf("Nt: ");
-    if (!nfc_initiator_transceive_bytes(pnd,abtAuth,4,abtRx,&szRx, 0))
+    if (szRx = nfc_initiator_transceive_bytes(pnd,abtAuth,4,abtRx,sizeof(abtRx), 0) < 0)
     {
         return 1;
     }
@@ -861,7 +861,7 @@ uint32_t darkside_keyrecovery_inner(nfc_device* pnd, uint32_t uiUID, uint64_t ui
     //printf(" Ar: ");
     //print_hex_par(abtArEnc,64,abtArEncPar);
 
-    if (!nfc_initiator_transceive_bits(pnd,abtArEnc,64,abtArEncPar,abtRx,&szRx,abtRxPar))
+    if ((szRx = nfc_initiator_transceive_bits(pnd,abtArEnc,64,abtArEncPar,abtRx,abtRxPar)) < 0)
     {
         if (sendSpoofAr)
         {
