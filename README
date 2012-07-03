@@ -29,7 +29,7 @@ e) The remaining unknown keys will be recovered using Nested Authentication.
 Requirements
 ------------
 
-libnfc version 1.5.1 must be installed with its requirements, see http://libnfc.org/
+libnfc version 1.6 must be installed with its requirements, see http://libnfc.org/
 
 
 
