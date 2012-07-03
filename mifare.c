@@ -42,10 +42,10 @@
  * The MIFARE Classic Specification (http://www.nxp.com/acrobat/other/identification/M001053_MF1ICS50_rev5_3.pdf) explains more about this process.
  */
 bool
-nfc_initiator_mifare_cmd (nfc_device_t * pnd, const mifare_cmd mc, const uint8_t ui8Block, mifare_param * pmp)
+nfc_initiator_mifare_cmd (nfc_device * pnd, const mifare_cmd mc, const uint8_t ui8Block, mifare_param * pmp)
 {
   byte_t  abtRx[265];
-  size_t  szRxLen;
+  ssize_t  szRxLen;
   size_t  szParamLen;
   byte_t  abtCmd[265];
 
@@ -88,7 +88,7 @@ nfc_initiator_mifare_cmd (nfc_device_t * pnd, const mifare_cmd mc, const uint8_t
     memcpy (abtCmd + 2, (byte_t *) pmp, szParamLen);
 
   // Fire the mifare command
-  if (!nfc_initiator_transceive_bytes (pnd, abtCmd, 2 + szParamLen, abtRx, &szRxLen, 0)) {
+  if ((szRxLen = nfc_initiator_transceive_bytes (pnd, abtCmd, 2 + szParamLen, abtRx, sizeof(abtRx), 0)) < 0) {
     //if (pnd->iLastError != 0x14)
       //nfc_perror (pnd, "nfc_initiator_transceive_bytes");
     return false;

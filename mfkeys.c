@@ -51,8 +51,8 @@ int main (int argc, char** argv)
     int i, j, k, l; // iterators
 
     // NFC
-    nfc_device_t *reader;
-    nfc_target_t target;
+    nfc_device *reader;
+    nfc_target target;
     
     // Mifare
     byte_t *mf_uid;
@@ -181,7 +181,7 @@ int main (int argc, char** argv)
   
     // Connect to reader
   
-    reader = nfc_connect(NULL);
+    reader = nfc_open(NULL, NULL);
 
     if (reader == NULL) {
         fprintf(stderr, "Unable to connect to NFC reader.\n");
@@ -190,16 +190,16 @@ int main (int argc, char** argv)
       
     if(!mf_configure(reader)) {
         fprintf(stderr, "NFC reader initialization failed.\n");
-        nfc_disconnect(reader);
+        nfc_close(reader);
         return EXIT_READERERROR;
     }
     
     if(option_verbose)
-        printf ("Found: NFC reader %s\n", reader->acName);
+        printf ("Found: NFC reader %s\n", nfc_device_get_connstring(reader));
         
  
     if(!mf_anticol(reader, &target)){
-        nfc_disconnect(reader);
+        nfc_close(reader);
         return 3;
     }
     
@@ -616,7 +616,7 @@ int main (int argc, char** argv)
     free(mf_keyb);
     
     
-    nfc_disconnect(reader);
+    nfc_close(reader);
     return 0;   
 }
 
