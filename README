@@ -53,9 +53,9 @@ along with mfkeys.  If not, see <http://www.gnu.org/licenses/>.
 
 Contains code partially or in full from the following projects:
 
-mfoc    Copyright (c) 2009 Andrei Costin <zveriu@gmail.com>, http://andreicostin.com
+mfcuk   Copyright (c) 2009 Andrei Costin <zveriu@gmail.com>, http://andreicostin.com
 
-mfcuk   Copyright (c) 2009 Norbert Szetei and Pavol Luptak <mifare@nethemba.com>
+mfoc    Copyright (c) 2009 Norbert Szetei and Pavol Luptak <mifare@nethemba.com>
                            Michal Boska <boska.michal@gmail.com>
                            Romuald Conty <romuald@libnfc.org>
                            
