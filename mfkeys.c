@@ -53,7 +53,7 @@ int main (int argc, char** argv)
     // NFC
     nfc_device *reader;
     nfc_target target;
-    
+    nfc_context *context;
     // Mifare
     byte_t *mf_uid;
     bool mf_4k = false;
@@ -180,13 +180,14 @@ int main (int argc, char** argv)
         printf ("Found: libnfc %s\n", nfc_version());
   
     // Connect to reader
-  
-    reader = nfc_open(NULL, NULL);
+    nfc_init(&context);
+    reader = nfc_open(context, NULL);
 
     if (reader == NULL) {
         fprintf(stderr, "Unable to connect to NFC reader.\n");
         return EXIT_READERERROR;
     }
+    printf("Reader connected");
       
     if(!mf_configure(reader)) {
         fprintf(stderr, "NFC reader initialization failed.\n");
